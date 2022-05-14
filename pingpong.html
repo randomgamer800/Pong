@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PingPong Game</title>
+</head>
+<body>
+    <canvas id="canvas" height="300" style="border:1px solid black; border-bottom: 2px solid brown;">Heyy canvas is not supported</canvas>
+    <script>
+        const canvas = document.getElementById('canvas') //'canvas' is the id so we are getting the canvas element
+        const ctx = canvas.getContext('2d') //ctx is context
+        const canvasH = canvas.height
+        const canvasW = canvas.width
+
+        let paddle = {h:50 , w:5}
+        let leftPaddle = (rightPaddle = ball = {})
+        let score = 0;
+        let increment = 0.2
+
+        setInitialVariables()
+        drawBall()
+        drawLeftPaddle()
+        drawRightPaddle()
+        drawScore()
+        drawCenterLine()
+        moveBall()
+        moveLeftPaddle()
+
+        function setInitialVariables(){
+            ball = {x:150 ,y:150, r:10, dx:2, dy:1}
+            leftPaddle = {x:0 ,y:125}
+            rightPaddle = {x:canvasW - 5 ,y:125}
+        }
+
+        function moveLeftPaddle(){
+            document.addEventListener('mousemove',(e)=>{
+                leftPaddle.y = e.screenY -350;
+            }) //looking for mouse movements
+        }
+        
+        function detectCollision(){
+            // detect right paddle collision
+            if (ball.x > rightPaddle.x - ball.r){
+                ball.dx = -ball.dx //paddle will hit the ball
+            }
+            // detect left paddle collision
+            if (ball.x < 0 + ball.r + paddle.w && ball.y > leftPaddle.y && ball.y < leftPaddle.y + paddle.h){
+                ball.dx = -ball.dx + 2*increment//paddle will hit the ball
+                ball.dy += increment //the 0.4 and 0.2 is for dynamic movement and increased difficulty
+                score++;
+            }
+            //detect bottom or top collision
+            if(ball.y > canvasH - ball.r || ball.y < 0 + ball.r){
+                ball.dy = -ball.dy;
+            }
+            //detect left collision
+            if(ball.x < 0 + ball.r){
+                alert('You lose')
+                setInitialVariables()
+            }
+        }
+
+        function moveBall(){
+            ball.x += ball.dx
+            ball.y += ball.dy //these two control speed
+            rightPaddle.y = ball.y - paddle.h/2; //paddle travelling in direction of ball
+            ctx.clearRect(0,0,canvasW,canvasH)
+            detectCollision()
+            drawBall()
+            drawScore()
+            drawCenterLine()
+            drawLeftPaddle()
+            drawRightPaddle()
+            requestAnimationFrame(moveBall); //redraw ball
+        }
+
+        function drawRightPaddle() {
+            ctx.beginPath()
+            ctx.setLineDash([]) //make it solid line
+            ctx.rect(rightPaddle.x,rightPaddle.y,paddle.w,paddle.h); //paddle in the middle
+            ctx.stroke(); //visible boundary
+            ctx.closePath()
+        }
+        function drawLeftPaddle() {
+            ctx.beginPath()
+            ctx.setLineDash([]) //make it solid line
+            ctx.rect(leftPaddle.x,leftPaddle.y,paddle.w,paddle.h); //paddle in the middle
+            ctx.stroke(); //visible boundary
+            ctx.closePath()
+        }
+        function drawBall() {
+            ctx.beginPath()
+            ctx.setLineDash([]) //make it solid line
+            ctx.arc(ball.x,ball.y,ball.r,0,2 * Math.PI);
+            ctx.stroke(); //visible boundary of ball
+            ctx.closePath()
+        }
+        function drawScore(){
+            ctx.beginPath()
+            ctx.fillStyle = "#000"
+            ctx.fill()
+            ctx.fillText("Score: "+ score,20,10)
+            ctx.closePath()
+        }
+        function drawCenterLine(){
+            ctx.beginPath()
+            ctx.setLineDash([5,5]) //make it dotted
+            ctx.moveTo(150,0)
+            ctx.lineTo(150,canvasH)
+            ctx.stroke()
+            ctx.closePath()
+        }
+    </script>
+</body>
+</html>
